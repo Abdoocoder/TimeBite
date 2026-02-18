@@ -28,8 +28,8 @@ export default function LoginPage() {
             if (error) throw error
             router.push('/')
             router.refresh()
-        } catch (err: any) {
-            setError(err.message || 'فشل تسجيل الدخول')
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'فشل تسجيل الدخول')
         } finally {
             setIsLoading(false)
         }

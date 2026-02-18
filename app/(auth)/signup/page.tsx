@@ -37,8 +37,8 @@ export default function SignupPage() {
             if (error) throw error
             alert('تم إنشاء الحساب بنجاح! يرجى التحقق من بريدك الإلكتروني.')
             router.push('/login')
-        } catch (err: any) {
-            setError(err.message || 'فشل إنشاء الحساب')
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : 'فشل إنشاء الحساب')
         } finally {
             setIsLoading(false)
         }
