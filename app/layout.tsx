@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { AuthProvider } from '@/lib/auth-context'
+import { Navbar } from '@/components/layout/navbar'
 
 export const metadata: Metadata = {
     title: 'TimeBite - Food Delivery on Time',
@@ -13,7 +15,12 @@ export default function RootLayout({
 }) {
     return (
         <html lang="ar" dir="rtl">
-            <body>{children}</body>
+            <body>
+                <AuthProvider>
+                    <Navbar />
+                    {children}
+                </AuthProvider>
+            </body>
         </html>
     )
 }
