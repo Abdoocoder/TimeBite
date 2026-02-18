@@ -4,12 +4,23 @@
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Create custom types
-CREATE TYPE user_role AS ENUM ('customer', 'restaurant', 'driver', 'admin');
-CREATE TYPE order_status AS ENUM ('pending', 'preparing', 'on_way', 'delivered', 'cancelled');
+-- Create custom types (check if exists first)
+DO $
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN
+        CREATE TYPE user_role AS ENUM ('customer', 'restaurant', 'driver', 'admin');
+    END IF;
+END $;
+
+DO $
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_status') THEN
+        CREATE TYPE order_status AS ENUM ('pending', 'preparing', 'on_way', 'delivered', 'cancelled');
+    END IF;
+END $;
 
 -- Users table (extends auth.users)
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT UNIQUE NOT NULL,
   full_name TEXT NOT NULL,
@@ -19,7 +30,7 @@ CREATE TABLE users (
 );
 
 -- Restaurants table
-CREATE TABLE restaurants (
+CREATE TABLE IF NOT EXISTS restaurants (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   owner_id UUID REFERENCES users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
@@ -33,7 +44,7 @@ CREATE TABLE restaurants (
 );
 
 -- Menu items table
-CREATE TABLE menu_items (
+CREATE TABLE IF NOT EXISTS menu_items (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   restaurant_id UUID REFERENCES restaurants(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
@@ -45,7 +56,7 @@ CREATE TABLE menu_items (
 );
 
 -- Orders table
-CREATE TABLE orders (
+CREATE TABLE IF NOT EXISTS orders (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   customer_id UUID REFERENCES users(id) ON DELETE CASCADE,
   restaurant_id UUID REFERENCES restaurants(id) ON DELETE CASCADE,
@@ -61,7 +72,7 @@ CREATE TABLE orders (
 );
 
 -- Order status history table
-CREATE TABLE order_status_history (
+CREATE TABLE IF NOT EXISTS order_status_history (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   order_id UUID REFERENCES orders(id) ON DELETE CASCADE,
   status TEXT NOT NULL,
@@ -182,21 +193,24 @@ EXECUTE FUNCTION update_restaurant_accuracy();
 -- Function to handle new user signup
 -- This syncs data from auth.users to public.users
 CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER AS $
 BEGIN
+  -- Insert user into public.users, ignore if already exists
   INSERT INTO public.users (id, email, full_name, role)
   VALUES (
     NEW.id,
     NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.email),
     COALESCE((NEW.raw_user_meta_data->>'role')::user_role, 'customer'::user_role)
-  );
+  )
+  ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Trigger to call handle_new_user on signup
-CREATE OR REPLACE TRIGGER on_auth_user_created
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 

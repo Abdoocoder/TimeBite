@@ -23,7 +23,7 @@ export default function SignupPage() {
         setError(null)
 
         try {
-            const { error } = await supabase.auth.signUp({
+            const { data, error } = await supabase.auth.signUp({
                 email,
                 password,
                 options: {
@@ -34,9 +34,25 @@ export default function SignupPage() {
                 },
             })
 
-            if (error) throw error
-            alert('تم إنشاء الحساب بنجاح! يرجى التحقق من بريدك الإلكتروني.')
-            router.push('/login')
+            if (error) {
+                // Provide more helpful error messages
+                if (error.message.includes('500') || error.status === 500) {
+                    throw new Error('خطأ في الخادم. يرجى التحقق من إعدادات Supabase والمحاولة لاحقاً.')
+                }
+                if (error.message.includes('already registered') || error.message.includes('already been registered')) {
+                    throw new Error('هذا البريد الإلكتروني مسجل بالفعل.')
+                }
+                throw error
+            }
+
+            if (data.user) {
+                alert('تم إنشاء الحساب بنجاح! يرجى التحقق من بريدك الإلكتروني.')
+                router.push('/login')
+            } else if (data.session) {
+                // User was created without email confirmation
+                alert('تم إنشاء الحساب بنجاح!')
+                router.push('/')
+            }
         } catch (err: unknown) {
             setError(err instanceof Error ? err.message : 'فشل إنشاء الحساب')
         } finally {
