@@ -46,6 +46,21 @@ export default function SignupPage() {
             }
 
             if (data.user) {
+                // Insert profile row into users table
+                const { error: profileError } = await supabase
+                    .from('users')
+                    .insert({
+                        id: data.user.id,
+                        email: data.user.email,
+                        full_name: fullName,
+                        phone: '',
+                        role: role,
+                    })
+
+                if (profileError) {
+                    console.error('Error creating user profile:', profileError)
+                }
+
                 alert('تم إنشاء الحساب بنجاح! يرجى التحقق من بريدك الإلكتروني.')
                 router.push('/login')
             } else if (data.session) {

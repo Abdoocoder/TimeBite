@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 .from('users')
                 .select('*')
                 .eq('id', id)
-                .single()
+                .maybeSingle()
 
             if (error) throw error
             setUser(data)
