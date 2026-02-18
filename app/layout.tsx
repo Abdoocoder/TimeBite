@@ -6,6 +6,9 @@ import { Navbar } from '@/components/layout/navbar'
 export const metadata: Metadata = {
     title: 'TimeBite - Food Delivery on Time',
     description: 'Reliable food delivery in Amman with accurate delivery time estimates',
+    icons: {
+        icon: '/icon',
+    },
 }
 
 export default function RootLayout({
