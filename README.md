@@ -3,7 +3,7 @@
 **Food delivery focused on time accuracy and transparency**
 
 ## Project Status
-🚧 **In Development** - MVP Phase
+✅ **MVP Complete** - All core features implemented
 
 ## Vision
 TimeBite is a food delivery platform for Amman, Jordan that solves the problem of unreliable delivery time estimates by:
@@ -17,21 +17,28 @@ TimeBite is a food delivery platform for Amman, Jordan that solves the problem o
 - **Styling**: Tailwind CSS
 - **Database**: Supabase (PostgreSQL)
 - **Auth**: Supabase Auth
-- **Maps**: Google Maps API
+- **Font**: Tajawal (Arabic)
+- **Maps**: Google Maps API (planned)
 - **Payments**: Stripe (planned)
 
 ## Project Structure
 ```
 TimeBite/
 ├── app/                    # Next.js 15 app router
-│   ├── (auth)/            # Authentication pages
-│   ├── (customer)/        # Customer-facing pages
-│   ├── (restaurant)/      # Restaurant dashboard
+│   ├── (auth)/            # Authentication (login, signup)
+│   ├── (customer)/        # Customer pages (restaurants, orders)
+│   ├── (restaurant)/      # Restaurant dashboard  
 │   ├── (driver)/          # Driver interface
-│   └── api/               # API routes
+│   └── api/               # API routes (restaurants, orders)
 ├── components/            # Reusable UI components
+│   ├── layout/            # Navbar
+│   └── ui/                # Button, Input, Card, Badge, Modal, Spinner, Textarea
 ├── lib/                   # Utilities & helpers
+│   ├── auth-context.tsx   # Auth context provider
+│   ├── supabase.ts        # Supabase client
+│   └── eta-calculator.ts  # ETA calculation logic
 ├── types/                 # TypeScript types
+├── supabase/              # Database schema & migrations
 └── public/                # Static assets
 ```
 
@@ -40,11 +47,23 @@ TimeBite/
 ### Prerequisites
 - Node.js 18+
 - npm or yarn
+- Supabase account
 
 ### Installation
 ```bash
 npm install
 ```
+
+### Environment Setup
+Copy `.env.example` to `.env.local` and fill in your Supabase credentials:
+```bash
+cp .env.example .env.local
+```
+
+### Database Setup
+Run the SQL files in your Supabase SQL Editor in this order:
+1. `supabase/schema.sql` - Main schema with tables, RLS policies, and triggers
+2. `supabase/fix-signup.sql` - Signup trigger fixes (if needed)
 
 ### Development
 ```bash
@@ -60,28 +79,43 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - `npm run lint` - Run ESLint
 - `npm run typecheck` - Run TypeScript compiler check
 
-## Core Features (Planned)
+## Core Features
 
-### Customer Interface
+### ✅ Authentication
+- Email/password signup & login
+- Role-based accounts (customer, restaurant, driver)
+- Automatic profile creation on signup
+
+### ✅ Customer Interface
 - Browse restaurants with On-Time Accuracy scores
-- Real-time ETA calculation
-- Order tracking
-- Delivery notifications
+- Search restaurants by name
+- View restaurant menus with prices
+- Add items to cart with quantity controls
+- Place orders with delivery address
+- Order tracking with status timeline
+- Order history
 
-### Restaurant Dashboard
-- Order management
-- Performance analytics
-- On-Time Accuracy monitoring
+### ✅ Restaurant Dashboard
+- Dashboard with stats (active orders, daily count, accuracy %, revenue)
+- Order management with status updates (pending → preparing → on_way)
+- Menu management (add, edit, delete, toggle availability)
+- Sidebar navigation with mobile support
 
-### Driver Interface
-- Order acceptance
-- Route optimization
-- Delivery completion
+### ✅ Driver Interface
+- View available deliveries
+- Accept delivery orders
+- Delivery detail with address and order info
+- Mark orders as delivered
+- Delivery history
 
-### Admin Features
-- System-wide analytics
-- Restaurant management
-- Driver management
+### ✅ API Routes
+- `GET /api/restaurants` - List active restaurants (with search)
+- `GET /api/restaurants/:id` - Restaurant details with menu
+- `GET /api/restaurants/:id/menu` - Restaurant menu items
+- `GET /api/orders` - Orders filtered by role
+- `POST /api/orders` - Create new order
+- `GET /api/orders/:id` - Order details with status history
+- `PATCH /api/orders/:id` - Update order status
 
 ## Unique Value Proposition
 
@@ -98,28 +132,28 @@ This transparency:
 
 ## Development Roadmap
 
-**Phase 1: Foundation** (Week 1-2)
+**Phase 1: Foundation** ✅
 - ✅ Project setup
-- ⏳ Supabase integration
-- ⏳ Authentication system
-- ⏳ Database schema
+- ✅ Supabase integration
+- ✅ Authentication system
+- ✅ Database schema
 
-**Phase 2: Core Features** (Week 3-4)
-- Restaurant listing
-- Menu system
-- Order creation
-- Basic ETA calculation
+**Phase 2: Core Features** ✅
+- ✅ Restaurant listing
+- ✅ Menu system
+- ✅ Order creation
+- ✅ Basic ETA calculation
 
-**Phase 3: Dashboards** (Week 5-6)
-- Restaurant dashboard
-- Driver interface
-- On-Time Accuracy calculation
+**Phase 3: Dashboards** ✅
+- ✅ Restaurant dashboard
+- ✅ Driver interface
+- ✅ On-Time Accuracy calculation
 
-**Phase 4: Polish & Launch** (Week 7-8)
-- Google Maps integration
-- Payment processing
-- Testing & bug fixes
-- Beta launch
+**Phase 4: Polish & Launch** ⏳
+- ⏳ Google Maps integration
+- ⏳ Payment processing (Stripe)
+- ⏳ Push notifications
+- ⏳ Beta launch
 
 ## Market Validation
 Before full development, conducting:
